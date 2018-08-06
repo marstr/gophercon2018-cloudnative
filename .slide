@@ -1,0 +1,53 @@
+Cloud-Native Go
+Write robust, scalable, reactive Go 
+9:00 27 Aug 2018
+Tags: go, cloud
+
+Josh Gavant
+Senior Program Manager, Microsoft
+joshgav@microsoft.com
+@joshugav
+
+Martin Strobel
+Software Developer II, Microsoft
+marst@microsoft.com
+@mkstrobel
+
+
+* Agenda
+
+1. What is Cloud Native?
+2. Compute
+3. Messaging
+4. Storage
+5. Running an Athens Proxy
+
+* What is Cloud Native?
+
+* What is Cloud Native?
+- Build your application to run in a data-center.
+- Take advantage of managed services.
+
+* Best Practices in Source
+
+- Cancellation, context.context
+- http.Do() err may not be what you were expecting
+
+* Writing a cancelable method
+
+.code cancellation/program.go /^func longSum/,/^}/
+
+- Use `select` to react to the first of multiple events.
+- Return an `error` so that callers know you stopped because of cancellation.
+
+* Calling a cancelable method
+
+.code cancellation/program.go /^func main/,/^}/
+
+- Cancellation is about culling unhelpful CPU cycles.
+- Flow-control and cancellation are different.
+
+* Compute
+
+* Compute
+** Serverless
