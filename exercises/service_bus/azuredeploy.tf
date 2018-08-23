@@ -10,6 +10,12 @@ resource "azurerm_servicebus_namespace" "gophercon2018" {
     sku = "standard"
 }
 
+resource "azurerm_servicebus_topic" "random_ids" {
+    name = "random_ids"
+    resource_group_name = "${azurerm_resource_group.gophercon2018.name}"
+    namespace_name = "${azurerm_servicebus_namespace.gophercon2018.name}"
+}
+
 resource "azurerm_servicebus_queue" "student0" {
     name = "student0"
     resource_group_name = "${azurerm_resource_group.gophercon2018.name}"
