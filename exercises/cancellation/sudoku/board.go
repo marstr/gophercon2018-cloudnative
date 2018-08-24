@@ -3,8 +3,11 @@ package sudoku
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
+	"io"
+	"math/big"
 	"sync"
 )
 
@@ -238,4 +241,128 @@ func (b Board) String() string {
 	}
 	fmt.Fprint(builder, horizontalSeparator)
 	return builder.String()
+}
+
+func IsSolution(original, solution Board) bool {
+	if !solution.Solved() {
+		return false
+	}
+
+	for i := range original {
+		for j := range original[i] {
+			if val := original[i][j]; val != 0 && val != solution[i][j] {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+// GenerateBoard creates a 
+func GenerateBoard(missing uint8) (Board, error) {
+	return GenerateBoardFrom(rand.Reader, missing)
+}
+
+func GenerateBoardFrom(reader io.Reader, missing uint8) (Board, error) {
+	retval := &Board{
+		[9]uint8{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		[9]uint8{4, 5, 6, 7, 8, 9, 1, 2, 3},
+		[9]uint8{7, 8, 9, 1, 2, 3, 4, 5, 6},
+		[9]uint8{2, 3, 4, 5, 6, 7, 8, 9, 1},
+		[9]uint8{5, 6, 7, 8, 9, 1, 2, 3, 4},
+		[9]uint8{8, 9, 1, 2, 3, 4, 5, 6, 7},
+		[9]uint8{3, 4, 5, 6, 7, 8, 9, 1, 2},
+		[9]uint8{6, 7, 8, 9, 1, 2, 3, 4, 5},
+		[9]uint8{9, 1, 2, 3, 4, 5, 6, 7, 8},
+	}
+
+	err := retval.scramble(reader)
+	if err != nil {
+		return Board{}, err
+	}
+
+	boardWidth := big.NewInt(9)
+
+	removed := uint8(0)
+	for removed < missing{
+		rawRow, err := rand.Int(reader, boardWidth)
+		if err != nil {
+			return Board{}, err
+		}
+		row := rawRow.Uint64()
+
+		rawCol, err := rand.Int(reader, boardWidth)
+		if err != nil {
+			return Board{}, err
+		}
+		col := rawCol.Uint64()
+
+		if retval[row][col] != 0 {
+			retval[row][col] = 0
+			removed++
+		}
+	}
+
+	return *retval, nil
+}
+
+// Scramble swaps random columns and rows within box boundaries, so that the board stays
+// valid, but is in a new configuration.
+func (b *Board) scramble(reader io.Reader) error {
+	const boxWidth = 3
+	bigBoxWidth := big.NewInt(boxWidth)
+	lessBigBox := big.NewInt(boxWidth - 1)
+
+	// Given a function that knows how to swap a row or column, generate two random slices that should be swapped.
+	// However, only rows/columns inside the same box may be swapped, or an invalid board state may be derived.
+	swapper := func(swap func(uint8, uint8)) error {
+		var x, y, offset uint8
+
+		rows := []uint8{0, 1, 2}
+
+		rawX, err := rand.Int(reader, bigBoxWidth)
+		if err != nil {
+			return err
+		}
+		x = rows[rawX.Int64()]
+		rows = append(rows[:rawX.Int64()], rows[rawX.Int64()+1:]...)
+
+		rawY, err := rand.Int(reader, lessBigBox)
+		if err != nil {
+			return err
+		}
+		y = rows[rawY.Int64()]
+
+		rawOffset, err := rand.Int(reader, bigBoxWidth)
+		if err != nil {
+			return err
+		}
+		offset = boxWidth * uint8(rawOffset.Uint64())
+
+		swap(offset+x, offset+y)
+		return nil
+	}
+
+	for i := 0; i < 400; i++ {
+		swapper(b.swapRows)
+		swapper(b.swapCols)
+	}
+	return nil
+}
+
+func (b *Board) swapRows(x, y uint8) {
+	for i := range b[x] {
+		temp := b[x][i]
+		b[x][i] = b[y][i]
+		b[y][i] = temp
+	}
+}
+
+func (b *Board) swapCols(x, y uint8) {
+	for i := range b {
+		temp := b[i][x]
+		b[i][x] = b[i][y]
+		b[i][y] = temp
+	}
 }

@@ -5,14 +5,15 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/Azure/azure-service-bus-go"
+	"github.com/marstr/gophercon2018-cloudnative/exercises/cancellation/sudoku"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/satori/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,11 +22,14 @@ import (
 var cfgFile string
 
 const (
-	serviceBusEnvVar       = "SERVICE_BUS_CONNECTION_STRING"
-	serviceBusKey          = "namespace-connection"
-	serviceBusTopicNameKey = "topic"
-	serviceBusTopicEnvVar  = "SERVICE_BUS_TOPIC"
-	serviceBusTopicDefault = "random_ids"
+	namespaceConnection       = "namespace-connection"
+	namespaceConnectionEnvVar = "SERVICE_BUS_CONNECTION_STRING"
+
+	topicName        = "topic"
+	topicEnvVar      = "SERVICE_BUS_TOPIC"
+	topicNameDefault = "random_ids"
+
+	logLevel = "log-level"
 )
 
 var messageRate time.Duration
@@ -38,40 +42,42 @@ var rootCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		go func() {
 			fmt.Scanln()
+			fmt.Println("cancelling on user request")
 			cancel()
 		}()
 
-		connStr := viper.GetString(serviceBusKey)
+		connStr := viper.GetString(namespaceConnection)
 		logrus.Debug(connStr)
 		ns, err := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(connStr))
 		if err != nil {
 			logrus.Fatalf("Unable to connect to Service Bus Namespace: %v", err)
 		}
 
-		// topics, err := ns.NewTopicManager().List(ctx)
-		// if err != nil {
-		// 	logrus.Fatalf("Unable to list Topics: %v", err)
-		// }
-
-		// for i := range topics {
-		// 	logrus.Info("Found Topic: ", topics[i].Name)
-		// }
-
-		client, err := ns.NewTopic(ctx, viper.GetString(serviceBusTopicNameKey))
+		client, err := ns.NewTopic(ctx, viper.GetString(topicName))
 		if err != nil {
 			logrus.Fatalf("Unable to create Topic client: %v")
 		}
 
 		for {
 
-			id := uuid.NewV4()
-			msg := servicebus.NewMessage(id[:])
+			board, err := sudoku.GenerateBoard(40)
+			if err != nil {
+				logrus.Errorf("Unable to generate message: %v", err)
+				continue
+			}
+
+			marshaled, err := json.Marshal(board)
+			if err != nil {
+				logrus.Errorf("Unable to serialize board")
+				continue
+			}
+			msg := servicebus.NewMessage(marshaled)
 
 			err = client.Send(ctx, msg)
 			if err == nil {
-				logrus.Infof("%s sent message", id)
+				logrus.Info("sent message")
 			} else {
-				logrus.Errorf("%s Unable to send message: %v", id, err)
+				logrus.Errorf("Unable to send message: %v", err)
 			}
 
 			select {
@@ -83,10 +89,12 @@ var rootCmd = &cobra.Command{
 		}
 	},
 	Args: func(cmd *cobra.Command, args []string) error {
-		if connection := viper.GetString(serviceBusKey); connection == "" {
-			return errors.New("No Service Bus connection")
+		// Ensure that a namespace connection string was provided.
+		if connection := viper.GetString(namespaceConnection); connection == "" {
+			return errors.New("No Service Bus connection string provided")
 		}
 
+		// Ensure that if a log-level was specified, that it is recognized by logrus
 		if ll, err := logrus.ParseLevel(viper.GetString("log-level")); err == nil {
 			logrus.SetLevel(ll)
 		} else {
@@ -97,12 +105,14 @@ var rootCmd = &cobra.Command{
 			return errors.New(out.String())
 		}
 
+		// Validate the message rate that was provided.
 		if parsed, err := time.ParseDuration(viper.GetString("message-rate")); err == nil {
 			messageRate = parsed
 		} else {
 			return errors.New("message-rate must be parse-able by time.ParseDuration")
 		}
 
+		// If any other arguments are provided, wag the finger.
 		return cobra.NoArgs(cmd, args)
 	},
 }
@@ -128,14 +138,20 @@ func init() {
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	viper.BindEnv(serviceBusKey, serviceBusEnvVar)
-	viper.BindEnv(serviceBusTopicNameKey, serviceBusTopicEnvVar)
+	viper.BindEnv(namespaceConnection, namespaceConnectionEnvVar)
+	viper.BindEnv(topicName, topicEnvVar)
 
-	viper.SetDefault("log-level", logrus.InfoLevel)
+	viper.SetDefault(logLevel, logrus.InfoLevel)
 	viper.SetDefault("message-rate", (2 * time.Second).String())
+	viper.SetDefault(topicName, topicNameDefault)
 
-	rootCmd.Flags().StringP(serviceBusKey, "c", viper.GetString(serviceBusKey)[:25]+"...", "The connection string (including SharedAccessKey) to the Service Bus Namespace in use.")
-	rootCmd.Flags().StringP(serviceBusTopicNameKey, "t", viper.GetString(serviceBusTopicNameKey), "The name of the Service Bus Topic to be published to.")
+	shortenedServiceBusKey := viper.GetString(namespaceConnection)
+	if len(shortenedServiceBusKey) > 25 {
+		shortenedServiceBusKey = shortenedServiceBusKey[:25] + "..."
+	}
+
+	rootCmd.Flags().StringP(namespaceConnection, "c", shortenedServiceBusKey, "The connection string (including SharedAccessKey) to the Service Bus Namespace in use.")
+	rootCmd.Flags().StringP(topicName, "t", viper.GetString(topicName), "The name of the Service Bus Topic to be published to.")
 	rootCmd.Flags().StringP("log-level", "l", viper.GetString("log-level"), "The verbosity of log output.")
 	rootCmd.Flags().StringP("message-rate", "r", viper.GetString("message-rate"), "The duration that should be waited between each send event.")
 

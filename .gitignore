@@ -14,3 +14,7 @@
 # Terraform Related files
 **/.terraform/
 *.tfstate*
+
+.idea/
+
+.env

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"os"
 
 	"github.com/marstr/gophercon2018-cloudnative/exercises/cancellation/sudoku"
 )
@@ -227,4 +228,31 @@ func ExampleManyToOneConverter() {
 	// | 6 4 2 | 9 7 8 | 5 3 1 |
 	// | 9 7 8 | 5 3 1 | 6 4 2 |
 	// -------------------------
+}
+
+func ExampleIsSolution() {
+	original := sudoku.Board{}
+	solved := sudoku.Board{
+		[9]uint8{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		[9]uint8{4, 5, 6, 7, 8, 9, 1, 2, 3},
+		[9]uint8{7, 8, 9, 1, 2, 3, 4, 5, 6},
+		[9]uint8{2, 3, 4, 5, 6, 7, 8, 9, 1},
+		[9]uint8{5, 6, 7, 8, 9, 1, 2, 3, 4},
+		[9]uint8{8, 9, 1, 2, 3, 4, 5, 6, 7},
+		[9]uint8{3, 4, 5, 6, 7, 8, 9, 1, 2},
+		[9]uint8{6, 7, 8, 9, 1, 2, 3, 4, 5},
+		[9]uint8{9, 1, 2, 3, 4, 5, 6, 7, 8},
+	}
+
+	fmt.Println(sudoku.IsSolution(original, solved))
+}
+
+func ExampleGenerateBoard() {
+	result, err := sudoku.GenerateBoard(40)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+
+	fmt.Println(result)
 }
