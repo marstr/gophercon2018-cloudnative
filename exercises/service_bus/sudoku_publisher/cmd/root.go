@@ -30,19 +30,21 @@ const (
 	topicNameDefault = "random_ids"
 
 	logLevel = "log-level"
+
+	messageCount = "message-count"
 )
 
 var messageRate time.Duration
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "publisher",
-	Short: "Sends random UUIDs to an Azure Service Bus Queue or Topic.",
+	Use:   "sudoku_publisher",
+	Short: "Sends random Sudoku puzzles to an Azure Service Bus Topic.",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx, cancel := context.WithCancel(context.Background())
 		go func() {
 			fmt.Scanln()
-			fmt.Println("cancelling on user request")
+			logrus.Info("cancelling on user request")
 			cancel()
 		}()
 
@@ -58,7 +60,14 @@ var rootCmd = &cobra.Command{
 			logrus.Fatalf("Unable to create Topic client: %v")
 		}
 
+		i := int64(0)
+		n := viper.GetInt64(messageCount)
 		for {
+			if i >= n {
+				break
+			} else if n != 0 {
+				i++
+			}
 
 			board, err := sudoku.GenerateBoard(40)
 			if err != nil {
@@ -132,7 +141,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.publisher.yaml)")
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sudoku_publisher.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -150,10 +159,28 @@ func init() {
 		shortenedServiceBusKey = shortenedServiceBusKey[:25] + "..."
 	}
 
-	rootCmd.Flags().StringP(namespaceConnection, "c", shortenedServiceBusKey, "The connection string (including SharedAccessKey) to the Service Bus Namespace in use.")
-	rootCmd.Flags().StringP(topicName, "t", viper.GetString(topicName), "The name of the Service Bus Topic to be published to.")
-	rootCmd.Flags().StringP("log-level", "l", viper.GetString("log-level"), "The verbosity of log output.")
-	rootCmd.Flags().StringP("message-rate", "r", viper.GetString("message-rate"), "The duration that should be waited between each send event.")
+	rootCmd.Flags().StringP(
+		namespaceConnection,
+		"c",
+		shortenedServiceBusKey,
+		"The connection string (including SharedAccessKey) to the Service Bus Namespace in use.")
+	rootCmd.Flags().StringP(
+		topicName,
+		"t",
+		viper.GetString(topicName),
+		"The name of the Service Bus Topic to be published to.")
+	rootCmd.Flags().StringP(
+		logLevel,
+		"l",
+		viper.GetString("log-level"),
+		"The verbosity of log output.")
+	rootCmd.Flags().StringP(
+		"message-rate",
+		"r",
+		viper.GetString("message-rate"),
+		"The duration that should be waited between each send event.")
+
+	rootCmd.Flags().Int64P(messageCount, "n", 0, "The number of puzzles to publish.")
 
 	viper.BindPFlags(rootCmd.Flags())
 }
@@ -171,9 +198,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".publisher" (without extension).
+		// Search config in home directory with name ".sudoku_publisher" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".publisher")
+		viper.SetConfigName(".sudoku_publisher")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

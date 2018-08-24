@@ -4,7 +4,7 @@ package main
 
 import (
 	"github.com/gobuffalo/envy"
-	"github.com/marstr/gophercon2018-cloudnative/exercises/service_bus/publisher/cmd"
+	"github.com/marstr/gophercon2018-cloudnative/exercises/service_bus/sudoku_publisher/cmd"
 )
 
 func main() {
