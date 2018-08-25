@@ -1,6 +1,9 @@
 package sudoku
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func Test_validSlice(t *testing.T) {
 	testCases := []struct {
@@ -15,9 +18,8 @@ func Test_validSlice(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		t.Run("", func(t *testing.T) {
+		t.Run(fmt.Sprint(tc.vals), func(t *testing.T) {
 			got := validSlice(tc.vals)
-			t.Log("test case: ", tc.vals)
 			if got != tc.expected {
 				t.Logf("got: %v want: %v", got, tc.expected)
 				t.Fail()

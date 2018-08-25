@@ -57,7 +57,7 @@ var rootCmd = &cobra.Command{
 
 		client, err := ns.NewTopic(ctx, viper.GetString(topicName))
 		if err != nil {
-			logrus.Fatalf("Unable to create Topic client: %v")
+			logrus.Fatalf("Unable to create Topic client: %v", err)
 		}
 
 		i := int64(0)
