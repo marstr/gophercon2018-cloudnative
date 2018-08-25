@@ -81,9 +81,76 @@ Functions -> Apps -> Containers -> Pods -> Cluster Apps
 - Deploy a pod to a shared Kubernetes cluster in AKS.
 
 
-* 3) Communicating Microservices
+* 3) Communicating Between Services
 
-- TODO
+* Communicating across thread boundaries
+
+* Channels
+
+- Thread safe queues
+- Read/Write are blocking
+- Optionally buffered
+- Multiple producer/readers are acceptable
+
+* Reading and Writing to Channels
+
+.code ./presentation/channels_test.go /^func ExampleReadWriteBufferedChannel/,/^}/
+
+- Must be buffered, or first write will never complete.
+
+* Channels and Fibonacci
+
+.code ./presentation/channels_test.go /^func ExampleBasicFibonacci/,/^}/
+
+: This doesn't ever terminate, does anybody in the audience see the problem?
+
+* Select
+
+.code ./presentation/channels_test.go /^func ExampleSelectBlock/,/^}/
+
+* Cancellable Fibonacci
+
+.code ./presentation/channels_test.go /^func ExampleCancellableFibonacci/,/^}/
+
+* Non-Blocking Channel Read
+
+.code ./presentation/channels_test.go /^func ExampleDefaultClause/,/^}/
+
+: `default` keyword unblocks a `select` when all channel operations were blocking.
+
+: This trick only works when you're deciding whether or not a channel has been closed.
+
+* context.Context
+
+.code ./presentation/channels_test.go /START CONTEXT DEF/,/END CONTEXT DEF/
+
+.code ./presentation/channels_test.go /type CancelFunc/,/\n/
+
+.code ./presentation/channels_test.go /func WithCancel/,/{/
+
+.code ./presentation/channels_test.go /func WithDeadline/,/{/
+
+.code ./presentation/channels_test.go /func WithTimeout/,/{/
+
+.code ./presentation/channels_test.go /func WithValue/,/{/
+
+: Feature rich cancellation semantics
+: Hierarchical cancellation propagation, timeout
+: Property bag
+: Good for Request-ID, and similar
+
+* Fibonacci with Context
+
+.code ./presentation/channels_test.go /func ExampleContextFibonacci/,/^}/
+
+* Break for Cancellation exercises
+
+Good luck!
+
+* Dealing with High-Latency Blocking Calls
+
+- Common to inject `context.Context` as first parameter:
+.code ./exercises/cancellation/sudoku/board.go /^type Solver/,/error/
 
 
 * 4) Managed Services
