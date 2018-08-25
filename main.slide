@@ -13,73 +13,89 @@ Software Engineer, Microsoft
 marstr@microsoft.com
 @mkstrobel
 
-* 1) Intro and overview
+########################################
 
-Your *presenters*
+* Contents
 
-*Schedule*:
-- 4 modules with exercises, each ~70m
-- End exercises, including deploying an Athen proxy.
-- Breaks and lunch
+1. Introduction
+2. What is "cloud native"?
+3. The compute spectrum
+4. The storage spectrum
+5. Communicating microservices
+6. Authentication and directories
+7. Build a "cloud-native" app: Athens
 
-*Nearby*: bathrooms, lunch, wifi
+########################################
 
-*Tech*: An Azure account and Azure CLI
+* Intro and Overview
 
-*Assistants*: who and where they are
+- Your presenters
+- Today: Several modules comprising discussion, demos and exercises
+- Breaks and lunch: 10:15, 11:45, 2:15, 3:30
+- Required tech: Linux laptop or VM, Azure CLI
+- Assistants
 
 
-* Overview: Cloud-native systems.
+* Resources
 
-.image img/cloud-native-app.png 494 610
+Azure accounts in Gophercon subscription
+.link https://github.com/marstr/gophercon2018-cloudnative github.com/marstr/gophercon2018-cloudnative
+.link https://azure.com/free azure.com/free
 
-Managed compute, communication, services, and delivery.
-
-: demo:
-: `GOPROXY=proxy_addr GO111MODULE=on go1.11* get`
-: show resources in Azure portal
-: monitoring?
-: discuss diagram and show each component
-
+########################################
 
 * What is "cloud-native"?
 
-.image img/cloud-native.png 358 490
+* What is "cloud-native"?
 
 1. Compute runtimes
 2. Communicating microservices
 3. Managed platform and services
 4. Continuous integration and delivery
 
+.image img/cloud-native.png 358 490
 
-* Exercises?
+* A cloud-native system
+
+Managed compute, communication, services, and delivery.
+
+.image img/cloud-native-app.png 494 610
 
 
-* 2) The Compute Spectrum
+########################################
+
+* The Compute Spectrum
+
+* The Compute Spectrum
+
+.image img/compute-spectrum.png
+
+* Exercise: Write and deploy a function.
+
+* Containers: what and why
+
+Shared, already started kernel means fast start times.
+Isolation with cgroups and namespaces means separate kernels aren't necessary.
+
+.image img/container-vs-vm.png 486 537
+
+* Containers: what and why
+
+Overlay filesystems mean most of base image can be cached and reused.
+
+.image img/overlay-fs.png
+
+* Exercise: Build, deploy and update a containerized app.
+
+########################################
+
+* The Storage Spectrum
 
 TODO(joshgav): <img>
-Functions -> Apps -> Containers -> Pods -> Cluster Apps
+Blobs -> Cache -> NoSQL -> RDBMS
+And don't forget data streams!
 
-: demos:
-: create and run a Function
-: update a codebase and app updates via ACR and WebApps
-: deploy a multi-container app to AKS
-
-: talking points:
-: PaaS vs. Containers - value added by App Service et al
-: Where do Functions best fit? Short-lived, event-driven, handle managed services.
-: orchestrators and pods
-: Event-driven architecture
-
-* Get started quickly with Buffalo
-
-* Exercises
-
-- Deploy a function to a shared function host.
-- Deploy a container to a registry and hosted web app.
-- Buffalo?
-- Deploy a pod to a shared Kubernetes cluster in AKS.
-
+########################################
 
 * 3) Communicating Between Services
 
@@ -152,21 +168,17 @@ Good luck!
 - Common to inject `context.Context` as first parameter:
 .code ./exercises/cancellation/sudoku/board.go /^type Solver/,/error/
 
+########################################
 
-* 4) Managed Services
+* Authentication and Directories
 
-- Storage and Databases
-- Authentication and Directory
-- Messaging
-- Code storage, build, test, and deploy
+TODO(joshgav): OAuth authorization code flow image
+- OAuth
+- OpenID Connect
 
+* Exercise: Run authenticated web app.
 
-* Exercises
+########################################
 
-- Store and retrieve a blob.
-- Set up a web app which logs in a user and says hello to them by name.
+* Exercise: Deploy Athens.
 
-
-* 5. Final exercises
-
-- Athens
