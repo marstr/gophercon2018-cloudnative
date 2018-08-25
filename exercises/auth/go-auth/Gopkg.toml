@@ -1,0 +1,19 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/net"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/subosito/gotenv"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/gorilla/sessions"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
