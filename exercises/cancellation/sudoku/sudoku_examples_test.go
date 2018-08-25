@@ -3,8 +3,8 @@ package sudoku_test
 import (
 	"context"
 	"fmt"
-	"time"
 	"os"
+	"time"
 
 	"github.com/marstr/gophercon2018-cloudnative/exercises/cancellation/sudoku"
 )

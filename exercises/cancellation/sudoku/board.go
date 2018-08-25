@@ -259,7 +259,7 @@ func IsSolution(original, solution Board) bool {
 	return true
 }
 
-// GenerateBoard creates a 
+// GenerateBoard creates a
 func GenerateBoard(missing uint8) (Board, error) {
 	return GenerateBoardFrom(rand.Reader, missing)
 }
@@ -285,7 +285,7 @@ func GenerateBoardFrom(reader io.Reader, missing uint8) (Board, error) {
 	boardWidth := big.NewInt(9)
 
 	removed := uint8(0)
-	for removed < missing{
+	for removed < missing {
 		rawRow, err := rand.Int(reader, boardWidth)
 		if err != nil {
 			return Board{}, err
