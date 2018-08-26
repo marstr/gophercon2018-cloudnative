@@ -240,9 +240,10 @@ Good luck!
 
 * Authentication and Directories
 
-TODO(joshgav): OAuth authorization code flow image
-- OAuth
-- OpenID Connect
+Delegate auth and directory with OAuth and OpenID Connect.
+
+.image img/oauth-authz-code.png 418 870
+
 
 * Exercise: Run authenticated web app.
 
