@@ -45,7 +45,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Ensure that if a log-level was specified, that it is recognized by logrus
-		if ll, err := logrus.ParseLevel(viper.GetString("log-level")); err == nil {
+		if ll, err := logrus.ParseLevel(viper.GetString(logLevel)); err == nil {
 			logrus.SetLevel(ll)
 		} else {
 			out := bytes.NewBufferString("Log Level must be one of:\n")
