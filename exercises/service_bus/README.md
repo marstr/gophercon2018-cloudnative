@@ -45,3 +45,17 @@ You'll need to:
     - [Namespace](https://godoc.org/github.com/Azure/azure-service-bus-go#Namespace)
     - [Topic](https://godoc.org/github.com/Azure/azure-service-bus-go#Topic)
     - [Subscription](https://godoc.org/github.com/Azure/azure-service-bus-go#Subscription)
+    
+## Exercise 2
+
+Modify both [sudoku_publisher](./sudoku_publisher/cmd/root.go) and
+[sudoku_subscriber](./sudoku_subsriber/cmd/root.go) so that they communicate
+bidirectionally with one another using two Service Bus Queues. 
+`sudoku_publisher` Should write to a queue `student%d-unsolved` and read from a 
+queue named `student%d-solved`. `sudoku_subscriber` should listen to 
+`student%d-unsolved` and reply to whichever Queue was specified in the `ReplyTo`
+property to the message received.
+
+The message that is sent back to `sudoku_publisher` should contain both the 
+original puzzle and the solution. You'll need to create your own type to hold
+and marshal/unmarshal those values.
