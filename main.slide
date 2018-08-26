@@ -85,6 +85,14 @@ Functions -> Apps -> Containers -> Pods -> Cluster Apps
 
 * Communicating across thread boundaries
 
+* What are we trying to avoid?
+
+- Unresponsive applications
+- Race conditions
+- Wasted system resources
+
+: Race conditions aren't just unsafe memory access, also unrespected business logic invariants.
+
 * Channels
 
 - Thread safe queues
@@ -92,21 +100,25 @@ Functions -> Apps -> Containers -> Pods -> Cluster Apps
 - Optionally buffered
 - Multiple producer/readers are acceptable
 
+: Mention that we're not going to talk about the `sync` package.
+
 * Reading and Writing to Channels
 
 .code ./presentation/channels_test.go /^func ExampleReadWriteBufferedChannel/,/^}/
 
 - Must be buffered, or first write will never complete.
 
+* Select
+
+.code ./presentation/channels_test.go /^func ExampleSelectBlock/,/^}/
+
+: Mention `select` race behavior, non-determinism.
+
 * Channels and Fibonacci
 
 .code ./presentation/channels_test.go /^func ExampleBasicFibonacci/,/^}/
 
 : This doesn't ever terminate, does anybody in the audience see the problem?
-
-* Select
-
-.code ./presentation/channels_test.go /^func ExampleSelectBlock/,/^}/
 
 * Cancellable Fibonacci
 
@@ -147,10 +159,66 @@ Functions -> Apps -> Containers -> Pods -> Cluster Apps
 
 Good luck!
 
-* Dealing with High-Latency Blocking Calls
+* Communication Patterns
 
-- Common to inject `context.Context` as first parameter:
-.code ./exercises/cancellation/sudoku/board.go /^type Solver/,/error/
+* What are we trying to avoid?
+- Duplication of code.
+- Overly tight coupling.
+- Mismatched resource utilization
+
+* Remote Procedure Call (RPC)
+- Allow another machine to do a single operation for you.
+- Same encapsulation as a function call.
+- Adds latency, but distribution allows amortized work.
+
+: Loads of technologies oriented around just this. `rpc` Go package, `gRPC`, even all the way back to `COM`.
+: Lots of debate about where the appropriate place is to draw the line for local function/RPC call.
+
+* Pub/Sub
+- Make all concerned parties aware of an event.
+- Decouples producer/consumer of data.
+- Should be done by a broker.
+- Each message should be easily individually traceable/auditable.
+
+* Streaming Processing
+- A special-case of pub/sub
+- Huge number of events being published.
+- Order is important, events partitioned together must be processed together.
+- Think stock tickers, telemetry, and error monitoring.
+
+: Easy to accidentally interpret this as more like UDP than TCP, where messages can be skipped, but that's not quite right.
+: Messages just are more important in aggregate than individually.
+
+* Calling Services Directly
+
+.image ./img/direct.png _ 750
+
+* Calling Services Directly
+
+- Guarantees you lowest latency while still distributing load.
+- Allows for highly agnostic contracts.
+- OpenCensus, et al. allow observability
+
+: Challenges - service discovery/load balancing are pretty frickin' manual.
+
+
+* Service Mesh
+
+- Services are paired with a "sidecar"
+- The sidecar takes care of all sophisticated communication tasks.
+- Original service takes care of just business logic.
+
+* Calling with a Broker
+
+.image ./img/brokered.png _ 750
+
+* Calling with a Broker
+
+- Retry logic/persistence handled by central authority.
+
+
+* Break for Service Bus exercises
+- Good luck!
 
 
 * 4) Managed Services
