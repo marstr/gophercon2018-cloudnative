@@ -18,6 +18,7 @@ leave the other settings at defaults.
 	```
 	cd ./go-sample
 	git init
+	# Make sure to use the HTTPS URL, SSH won't work.
 	git remote add origin https://github.com/<your_name>/go-sample.git
 	git add .
 	git commit -m "initial commit"
