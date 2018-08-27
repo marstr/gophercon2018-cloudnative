@@ -68,6 +68,8 @@ Managed compute, communication, services, and delivery.
 
 * The Compute Spectrum
 
+Use "just enough" compute for each service.
+
 .image img/compute-spectrum.png
 
 * Exercise: Write and deploy a function.
@@ -87,17 +89,15 @@ Overlay filesystems mean most of base image can be cached and reused.
 
 * Exercise: Build, deploy and update a containerized app.
 
-########################################
-
 * The Storage Spectrum
 
-TODO(joshgav): <img>
-Blobs -> Cache -> NoSQL -> RDBMS
-And don't forget data streams!
+With many services, storage must be externalized.
+
+.image img/storage-spectrum.png
 
 ########################################
 
-* 3) Communicating Between Services
+* Communicating Between Services
 
 * Communicating across thread boundaries
 
