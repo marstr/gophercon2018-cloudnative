@@ -19,6 +19,7 @@ leave the other settings at defaults.
 	cd ./go-sample
 	git init
 	git remote add origin https://github.com/<your_name>/go-sample.git
+	git add .
 	git commit -m "initial commit"
 	git push origin master
 	```
