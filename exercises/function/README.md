@@ -16,14 +16,14 @@ In this exercise you will:
 
 	source ./script/prep_env.sh
 
-	az login
+	az login --tenant <provided tenant id>
 
 	functionapp_id=$(az functionapp create \
 		--name $functionapp_name \
 		--resource-group $group_name \
 		--storage-account $storage_account_id \
 		--plan $appservice_plan_id \
-		--deployent-container-image-name $runtime_image_uri \
+		--deployment-container-image-name $runtime_image_uri \
 		--query id --output tsv)
 
 	az functionapp show --ids $functionapp_id
