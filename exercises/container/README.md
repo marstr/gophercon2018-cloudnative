@@ -54,7 +54,7 @@ leave the other settings at defaults.
 
 1. Create a repository for your image and configure build tasks. Then kick off a build!
 
-	You'll need to get a personal access token from GitHub at <https://github.com/settings/tokens> and set it in GH\_TOKEN. This is used to set up a persistent webhook in the GitHub repo.
+	You'll need to get a personal access token with repo scope from GitHub at <https://github.com/settings/tokens> and set it in GH\_TOKEN. This is used to set up a persistent webhook in the GitHub repo. In the list of different scopes you can assign to the token, check the first check box for "repo".
 
 	```
 	GH_TOKEN=
