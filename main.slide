@@ -39,6 +39,10 @@ marstr@microsoft.com
 * Resources
 
 Azure accounts in Gophercon subscription
+az CLI
+    * to install locally see `./exercises/setup`
+    * or `docker run -it microsoft/azure-cli`
+    * or <https://shell.azure.com/>
 .link https://github.com/marstr/gophercon2018-cloudnative github.com/marstr/gophercon2018-cloudnative
 .link https://azure.com/free azure.com/free
 
