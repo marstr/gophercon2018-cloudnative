@@ -20,7 +20,7 @@ Modify the [main method](./program.go#main) so that pressing the "Enter" key at 
 
 Hint: This will involve introducing a new Goroutine which waits for a newline to be written, then calls the "cancel" method provided by [`context.WithCancel`](https://godoc.org/context#WithCancel) or [`context.WithTimeout`](https://godoc.org/context#WithTimeout).
 
-## Excercise 3
+## Exercise 3
 
 Update [`program.go`](./program.go) so that instead of calling `printAndSolve` it begins finding all solutions to all Sudoku puzzles by calling `BasicManySolver` with the empty Board. (This is easiest to get at by using `sudoku.Board{}`.) **It is not expected that you print out all of these solutions!** Instead print nothing until the "Enter" key has been pressed, then print the number of solutions that have been found.
 
