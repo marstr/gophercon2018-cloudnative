@@ -7,6 +7,13 @@ import (
 // BasicManySolver recurses over all `Valid` boards beyond the one that was given to it.
 // Whenever it finds  a solution, in publishes it.
 func BasicManySolver(ctx context.Context, puzzle Board, solutions chan<- Board) (err error) {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// Intentionally Left Blank
+	}
+
 	// If the puzzle isn't valid, there are no solutions.
 	if !puzzle.Valid() {
 		return
@@ -14,8 +21,12 @@ func BasicManySolver(ctx context.Context, puzzle Board, solutions chan<- Board) 
 
 	// If the puzzle is solved, there's no work to do. Publish and return.
 	if puzzle.Solved() {
-		solutions <- puzzle
-		return
+		select {
+			case solutions <- puzzle:
+				return nil
+			case <-ctx.Done():
+				return ctx.Err()
+		}
 	}
 
 	// Find the first blank spot on the board to begin traversal. We know there's at least
