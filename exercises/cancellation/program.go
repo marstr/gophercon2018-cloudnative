@@ -61,24 +61,36 @@ func main() {
 		[9]uint8{0, 0, 0, 0, 0, 2, 0, 4, 5},
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	printAndSolve(ctx, easy)
-	printAndSolve(ctx, medium)
-	printAndSolve(ctx, hard)
-	printAndSolve(ctx, evil)
+	go func() {
+		fmt.Scanln()
+		cancel()
+	}()
+
+	for i := 0; i < 100; i++ {
+		select {
+		case <-ctx.Done():
+			break
+		default:
+			// Intentionally Left Blank
+		}
+		printAndSolve(ctx, easy)
+		printAndSolve(ctx, medium)
+		printAndSolve(ctx, hard)
+		printAndSolve(ctx, evil)
+	}
 }
 
 func printAndSolve(ctx context.Context, subject sudoku.Board) {
-	fmt.Printf("Original:\n\n%s\n", subject)
 
 	start := time.Now()
 	sln, err := sudoku.ManyToOneConverter(sudoku.BasicManySolver).Solve(ctx, subject)
 	elapsed := time.Since(start)
 
 	if err == nil {
+		fmt.Printf("Original:\n\n%s\n", subject)
 		fmt.Printf("Solution (found after %v):\n\n%s\n", elapsed, sln)
-	} else {
-		fmt.Println("Could not solve puzzle:", err)
 	}
 }
