@@ -4,10 +4,14 @@ package cmd
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 
+	"github.com/Azure/azure-service-bus-go"
+	"github.com/marstr/gophercon2018-cloudnative/exercises/cancellation/sudoku"
 	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -36,7 +40,32 @@ var rootCmd = &cobra.Command{
 	Use:   "sudoku_subscriber",
 	Short: "Listens to a Service Bus Subscription, solving Sudoku puzzles that are sent across.",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Implement exercise 1 here!
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		ns, err := servicebus.NewNamespace(
+			servicebus.NamespaceWithConnectionString(viper.GetString(namespaceConnection)))
+
+		if err != nil {
+			panic(err)
+		}
+
+		topic, err := ns.NewTopic(ctx, viper.GetString(topicName))
+		if err != nil {
+			panic(err)
+		}
+
+		sub, err := topic.NewSubscription(ctx, viper.GetString(subscriptionName))
+		if err != nil {
+			panic(err)
+		}
+
+		handle, err := sub.Receive(ctx, Solve)
+		if err != nil {
+			panic(err)
+		}
+
+		<-handle.Done()
 	},
 	Args: func(cmd *cobra.Command, args []string) error {
 		// Ensure that a namespace connection string was provided.
@@ -66,6 +95,22 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func Solve(ctx context.Context, msg *servicebus.Message) servicebus.DispositionAction {
+	var target sudoku.Board
+	err := json.Unmarshal(msg.Data, &target)
+	if err != nil {
+		return msg.DeadLetter(err)
+	}
+
+	_, err = sudoku.ManyToOneConverter(sudoku.BasicManySolver).Solve(ctx, target)
+	if err != nil {
+		return msg.DeadLetter(err)
+	}
+
+	fmt.Println("solved!")
+	return msg.Complete()
 }
 
 func init() {
