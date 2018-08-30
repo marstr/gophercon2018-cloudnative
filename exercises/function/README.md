@@ -23,7 +23,7 @@ In this exercise you will:
 		--resource-group $group_name \
 		--storage-account $storage_account_id \
 		--plan $appservice_plan_id \
-		--deployent-container-image-name $runtime_image_uri \
+		--deployment-container-image-name $runtime_image_uri \
 		--query id --output tsv)
 
 	az functionapp show --ids $functionapp_id
